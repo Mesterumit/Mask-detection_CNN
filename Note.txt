@@ -1,0 +1,58 @@
+| Situation           | Correct Pipeline             |
+| ------------------- | ---------------------------- |
+| Tabular data        | `TensorDataset → DataLoader` |
+| NumPy arrays        | `TensorDataset → DataLoader` |
+| CSV features        | `TensorDataset → DataLoader` |
+| Images on disk      | `ImageFolder → DataLoader`   |
+| Large image dataset | `ImageFolder → DataLoader`   |
+
+
+
+///// Comparing two things , second exam from "leeson31_demo""
+ 
+-- because i have data in disk, i am using this line in transforms
+
+transforms.ToTensor(), # this line doing "torch.stack and torch.tensor"
+
+
+# Reshape and preload entire dataset to device for faster training
+X_train_full = torch.stack([img for img, _ in train_dataset]).to(device)
+y_train_full = torch.tensor([label for _, label in train_dataset]).to(device)
+
+
+ImageFolder avoids re-uploading huge data every time.
+
+ImageFolder → a Dataset
+DataLoader → a batching + loading engine
+
+Where does the data live during training?
+| Stage           | Location |
+| --------------- | -------- |
+| Original images | Disk     |
+| Current batch   | RAM      |
+| Training batch  | GPU      |
+| After batch     | Freed    |
+
+////////////////////////////////////////////////////////////////////////
+# What DataLoader does with that
+# When DataLoader builds a batch, it does this conceptually:
+# batch = [
+#     (img1, label1),
+#     (img2, label2),
+#     ...
+# ]
+# Then it automatically splits them into:
+# X_batch = stack([img1, img2, ...])
+# y_batch = tensor([label1, label2, ...])
+# So the separation happens inside DataLoader, not in your code.
+
+////////////////////////////////////////////////////////////////////////
+What random_split / indices are doing
+train_indices = indices[:n_train]
+val_indices   = indices[n_train:]
+
+////////////////////////////////////////////////////////////////////////
+X_batch, y_batch = next(iter(train_loader))
+Internally it does something like:
+for i in train_indices:
+    img, label = dataset[i]
