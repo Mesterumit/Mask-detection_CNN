@@ -56,3 +56,13 @@ X_batch, y_batch = next(iter(train_loader))
 Internally it does something like:
 for i in train_indices:
     img, label = dataset[i]
+
+
+
+
+
+/////////////.  TASK //////////////////////////
+
+Load and preprocess the image datasets:
+Preparing:
+Training and Testing Datasets
